@@ -2,8 +2,8 @@
 usage_calculation.py
 
 This script calculates the water usage at different endpoints in a water distribution
-network over a specified time range. It outputs the calculated usage data to a CSV file
-located in the 'outputs' directory.
+network over a specified time range. It outputs the calculated usage data and its hash
+to a CSV file located in the 'outputs' directory.
 
 Functions:
 - calculate_endpoint_usage: Calculates and outputs water usage at endpoints.
@@ -11,10 +11,11 @@ Functions:
 
 import os
 import pandas as pd
+import hashlib
 
 def calculate_endpoint_usage(file_path):
     """
-    Calculates water usage at endpoints within a specified time range and saves the data to a CSV file in the 'outputs' directory.
+    Calculates water usage at endpoints within a specified time range and saves the data to a CSV file in the 'outputs' directory. Also, computes and prints the hash of the output data.
 
     Parameters:
     - file_path (str): Path to the dataset file.
@@ -47,7 +48,13 @@ def calculate_endpoint_usage(file_path):
     output_file_path = os.path.join(output_dir, 'endpoint_water_usage.csv')
     grouped_data.to_csv(output_file_path, index=False)
 
+    # Calculate and print the hash of the output file
+    with open(output_file_path, 'rb') as file:
+        file_content = file.read()
+    hash_result = hashlib.sha256(file_content).hexdigest()
+
     print(f"Water usage at endpoints has been calculated and stored in {output_file_path}.")
+    print(f"The SHA-256 hash of the output file is: {hash_result}")
 
 if __name__ == "__main__":
     file_path = 'datasets/water_distribution_data.csv'  # Replace with the actual path to your dataset
