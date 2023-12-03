@@ -2,21 +2,20 @@
 usage_calculation.py
 
 This script calculates the water usage at different endpoints in a water distribution
-network. It outputs the calculated usage data and its hash
-to a CSV file located in the 'outputs' directory.
+network and returns the hash of the calculated usage data.
 
 Functions:
-- calculate_endpoint_usage: Calculates and outputs water usage at endpoints.
+- calculate_endpoint_usage: Calculates and returns the hash of water usage at endpoints.
 """
 
-import os
+
 import pandas as pd
 import hashlib
 from io import StringIO
 
 def calculate_endpoint_usage(csv_data):
     """
-    Calculates water usage at endpoints within the entire dataset and saves the data to a CSV file in the 'outputs' directory. Also, computes and prints the hash of the output data.
+    Calculates water usage at endpoints within the entire dataset and returns the SHA-256 hash of the calculated data.
 
     Parameters:
     - csv_data (str): String containing CSV formatted data.
@@ -30,22 +29,11 @@ def calculate_endpoint_usage(csv_data):
     # Grouping the data by sensor ID and calculating total water usage for each endpoint
     grouped_data = filtered_data.groupby('sensor_id')['water_usage'].sum().reset_index()
 
-    # Create 'outputs' directory if it doesn't exist
-    output_dir = 'outputs'
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    # Convert the grouped data to a CSV string and calculate its hash (without index and header)
+    grouped_data_csv = grouped_data.to_csv(index=False, header=False)
+    hash_result = hashlib.sha256(grouped_data_csv.encode()).hexdigest()
 
-    # Saving the results to a CSV file in the 'outputs' directory
-    output_file_path = os.path.join(output_dir, 'endpoint_water_usage.csv')
-    grouped_data.to_csv(output_file_path, index=False)
-
-    # Calculate and print the hash of the output file
-    with open(output_file_path, 'rb') as file:
-        file_content = file.read()
-    hash_result = hashlib.sha256(file_content).hexdigest()
-
-    print(f"Water usage at endpoints has been calculated and stored in {output_file_path}.")
-    print(f"The SHA-256 hash of the output file is: {hash_result}")
+    return hash_result
 
 if __name__ == "__main__":
     # Example CSV data as a string
@@ -194,4 +182,5 @@ if __name__ == "__main__":
 2023-01-01 00:00:00,1010,Junction,Local,1364
 2023-01-01 00:00:00,1000,Junction,Master,8114.332102795825
 """
-    calculate_endpoint_usage(csv_data)
+
+print(calculate_endpoint_usage(csv_data))
